@@ -1,17 +1,17 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 
-export default function BemVindo() {
+export default function BemVindoScreen({ navigation }) {
   return(
     <View style={styles.container}>
       <Text style={styles.titulo}>Bem vindo</Text>
-      <Image source={require('../src/img/ImgBemVindo.png')} style={styles.img}/>
+      <Image source={require('../img/ImgBemVindo.png')} style={styles.img}/>
       <Text style={styles.texto}>Acesse ou cadastre-se com o e-mail</Text>
-      <TouchableOpacity style={styles.botao}>
-        <Image source={require('../src/img/carta.png')} style={styles.carta}/>
+      <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('Login')}>
+        <Image source={require('../img/carta.png')} style={styles.carta}/>
         <Text style={styles.txtBotao}>Acessar com o E-mail</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.link}>
+      <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('Cadastro')}>
         <Text style={styles.txtLink}>Cadastre-se com o E-mail</Text>
       </TouchableOpacity>
     </View>
