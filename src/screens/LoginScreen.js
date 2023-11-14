@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../configs/firebase";
+
 
 export default function LoginScreen({ navigation }) {
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+
+
 
   const logar = async () => {
     const loginData = {
@@ -13,53 +18,21 @@ export default function LoginScreen({ navigation }) {
       descricao_senha: senha,
     };
 
-    try {
-      const response = await fetch("http://192.168.0.7:8080/api/login", {
-        method: "GET"
+    signInWithEmailAndPassword(auth, email, senha)
+      .then(() => {
+        navigation.replace('Home');
+        console.log(loginData);
       })
-
-      if (response.status != 200) {
-        Alert.alert("Erro", "Não foi possivel fazer a requisicao");
-      } else {
-        const responseBody = await response.json();
-        let found = false
-        responseBody["_embedded"]["entityModelList"].forEach(e => {
-          const emailFromResponse = e["descricao_email"]
-          const senhaFromResponse = e["descricao_senha"]
-
-          if (emailFromResponse == email && senhaFromResponse == senha) {
-            console.log("Logado");
-            navigation.push("Home");
-            found = true
-
-            const carregarLogin = async () => {
-              try {
-                const obj = await AsyncStorage.getItem('login');
-                if (obj == null)
-                  console.log('Nenhum login encontrado');
-              } catch (error) {
-                console.log('Erro ao recuperar dados:', error);
-              }
-            }
-
-            useEffect(() => { carregarLogin(); }, []);
-
-          }
-        })
-
-        if (!found) {
-          Alert.alert("Erro", "Usuário ou senha incorretos");
-        }
-
-      }
-    } catch (error) {
-      console.error("Erro na requisição:", error);
-      Alert.alert("Erro", "Ocorreu um erro na requisição. Tente novamente mais tarde.");
-    }
-  };
-
-
-
+      .catch((err) => {
+        console.log('erro', JSON.stringify(err));
+        if (err.code == 'auth/invalid-email')
+          alert('Email inválido');
+        else if (err.code == 'auth/wrong-password')
+          alert('Senha inválida');
+        else
+          alert(err.message);
+      })
+  }
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.goBack()}>

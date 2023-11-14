@@ -1,44 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../configs/firebase";
 
 export default function CadastroScreen({ navigation }) {
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  const cadastrarLogin = () => {
+  const cadastrarLogin = async () => {
     const login = {
       descricao_email: email,
       descricao_senha: senha
     };
 
-    fetch("http://192.168.0.7:8080/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(login)
-    })
-      .then(response => response.json())
-      .then(data => {
-        navigation.goBack();
-
-        const salvarLogin = async () => {
-          try {
-            await AsyncStorage.setItem('login', JSON.stringify(login));
-          } catch (error) {
-            console.log('Erro ao salvar os dados:', error);
-          }
-        };
-        salvarLogin();
-        setTimeout(() => {
-          alert("Cadastro realizado com sucesso!");
-        }, 100);
-        console.log("Resposta da API:", data);
+    createUserWithEmailAndPassword(
+      auth,
+      email,
+      senha
+    )
+      .then(() => {
+        navigation.navigate('Login');
+        alert("Cadastro realizado com sucesso!");
+        console.log(login);
       })
-      .catch(error => {
-        console.log("Erro na requisição:", error)
-      })
+      .catch((err) => console.log(err.message))
   }
 
   return (
